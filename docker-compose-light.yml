@@ -1,0 +1,6 @@
+version: "2"
+services:
+  uni-resolver-web:
+    image: phil21/uni-resolver-web:latest
+    ports:
+      - "8080:8080"

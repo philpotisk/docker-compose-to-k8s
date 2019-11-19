@@ -5,24 +5,29 @@ import os
 import getopt
 import yaml
 
+def initDeploymentDir(outputdir):
+  if os.path.exists(outputdir + '/' + 'deploy.sh'):
+    os.remove(outputdir + '/' +'deploy.sh')
+  if not os.path.exists(outputdir):
+    os.makedirs(outputdir)
+  fout = open(outputdir + '/' + 'deploy.sh', "a+")
+  fout.write('kubectl delete --all deployments --namespace=uni-resolver\n')
+  fout.write('kubectl delete --all services --namespace=uni-resolver\n')
+  fout.close()
+
 def addDeployment(containerName, deploymentFile, outputdir):
    fout = open(outputdir + '/' + 'deploy.sh', "a+")
-   fout.write('kubectl -n uni-resolver delete -f %s \n'%deploymentFile)
-   fout.write('kubectl -n uni-resolver create -f %s \n'%deploymentFile)
+   fout.write('kubectl -n uni-resolver apply -f %s \n'%deploymentFile)
    fout.close()
 
 def getContainerNameVersion(containterTag):
   if (containterTag.find('/') < 0):
     return
   user,containerNameVersion = containterTag.split('/')
-  #print('containterTag' + containterTag)
   return containerNameVersion.split(':')
 
 def generateDeploymentSpecs(containterTags, outputdir):
-    if os.path.exists(outputdir + '/' + 'deploy.sh'):
-       os.remove(outputdir + '/' +'deploy.sh')
-    if not os.path.exists(outputdir):
-        os.makedirs(outputdir)
+    initDeploymentDir(outputdir)
 
     for containterTag in containterTags.split(';'):
         if (containterTag == ''):
@@ -62,7 +67,7 @@ def generateIngress(containterTags, outputdir):
     print("Generating uni-resolver-ingress.yaml")
     fout = open(outputdir + '/uni-resolver-ingress.yaml', "wt")
     fout.write('apiVersion: extensions/v1beta1\n')
-    fout.write('kind: \n')
+    fout.write('kind: Ingress\n')
     fout.write('metadata:\n')
     fout.write('  name: \"uni-resolver-web\"\n')
     fout.write('  namespace: \"uni-resolver\"\n')

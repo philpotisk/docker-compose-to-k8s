@@ -59,6 +59,6 @@ services:
     ports:
       - "8091:8080"
   uni-resolver-web:
-    image: universalresolver/uni-resolver-web:latest
+    image: phil21/uni-resolver-web:latest
     ports:
       - "8080:8080"
