@@ -4,3 +4,27 @@ services:
     image: phil21/uni-resolver-web:latest
     ports:
       - "8080:8080"
+  driver-did-btcr:
+    image: phil21/driver-did-btcr:latest
+    environment:
+      uniresolver_driver_did_btcr_bitcoinConnection: ${uniresolver_driver_did_btcr_bitcoinConnection}
+      uniresolver_driver_did_btcr_rpcUrlMainnet: ${uniresolver_driver_did_btcr_rpcUrlMainnet}
+      uniresolver_driver_did_btcr_rpcUrlTestnet: ${uniresolver_driver_did_btcr_rpcUrlTestnet}
+    ports:
+      - "8081:8080"
+  driver-did-stack:
+    image: phil21/driver-did-stack:latest
+    ports:
+      - "8084:8080"
+  driver-did-erc725:
+    image: phil21/driver-did-erc725:latest
+    environment:
+      uniresolver_driver_did_erc725_ethereumConnections: ${uniresolver_driver_did_erc725_ethereumConnections}
+      uniresolver_driver_did_erc725_rpcUrls: ${uniresolver_driver_did_erc725_rpcUrls}
+      uniresolver_driver_did_erc725_etherscanApis: ${uniresolver_driver_did_erc725_etherscanApis}
+    ports:
+      - "8085:8080"
+  jolocom-did-driver:
+    image: jolocomgmbh/jolocom-did-driver:latest
+    ports:
+      - "8088:8080"

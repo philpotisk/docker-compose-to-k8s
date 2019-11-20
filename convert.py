@@ -4,6 +4,7 @@ import sys
 import os
 import getopt
 import yaml
+import subprocess
 
 def initDeploymentDir(outputdir):
   if os.path.exists(outputdir + '/' + 'deploy.sh'):
@@ -14,6 +15,7 @@ def initDeploymentDir(outputdir):
   fout.write('kubectl delete --all deployments --namespace=uni-resolver\n')
   fout.write('kubectl delete --all services --namespace=uni-resolver\n')
   fout.close()
+  subprocess.call(['chmod', "a+x", outputdir + '/' + 'deploy.sh'])
 
 def addDeployment(containerName, deploymentFile, outputdir):
    fout = open(outputdir + '/' + 'deploy.sh', "a+")
@@ -38,7 +40,7 @@ def generateDeploymentSpecs(containterTags, outputdir):
         fout = open(outputdir + '/' + deploymentFile, "wt")
         print('Writing file: ' + outputdir + '/' + deploymentFile + ' for containter: ' + containterTag)
         for line in fin:
-            fout.write(line.replace('{containerName}', containerName).replace('{containterTag}', containterTag))
+            fout.write(line.replace('{{containerName}}', containerName).replace('{{containterTag}}', containterTag))
         addDeployment(containerName, deploymentFile, outputdir)
         fin.close()
         fout.close()
@@ -90,8 +92,8 @@ def generateIngress(containterTags, outputdir):
       if (containterTag == ''):
         return
       containerName, containerVersion = getContainerNameVersion(containterTag)
-      if (containerName == 'uni-resolver-web'):
-          return
+      if (containerName == 'uni-resolver-web'): # this is the default-name, hosted at: uniresolver.com
+        continue
       subDomainName = containerName.replace('did', '').replace('driver', '').replace('uni-resolver', '').replace('-', '')
       print('Adding domain: ' + subDomainName + '.uniresolver.com')
 
@@ -101,7 +103,7 @@ def generateIngress(containterTags, outputdir):
       fout.write('          - path: /*\n')
       fout.write('            backend:\n')
       fout.write('              serviceName: "' + containerName + '"\n')
-      fout.write('              servicePort: 80\n')
+      fout.write('              servicePort: 8080\n')
 
     fout.close()
 
