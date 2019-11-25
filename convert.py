@@ -6,6 +6,8 @@ import getopt
 import yaml
 import subprocess
 
+DEFAULT_DOMAIN_NAME = 'uniresolver.com'
+
 def initDeploymentDir(outputdir):
   if os.path.exists(outputdir + '/' + 'deploy.sh'):
     os.remove(outputdir + '/' +'deploy.sh')
@@ -66,6 +68,7 @@ def getContainerTags(fileName):
     
 
 def generateIngress(containterTags, outputdir):
+    global DEFAULT_DOMAIN_NAME
     print("Generating uni-resolver-ingress.yaml")
     fout = open(outputdir + '/uni-resolver-ingress.yaml', "wt")
     fout.write('apiVersion: extensions/v1beta1\n')
@@ -80,24 +83,24 @@ def generateIngress(containterTags, outputdir):
     fout.write('    app: \"uni-resolver-web\"\n')
     fout.write('spec:\n')
     fout.write('  rules:\n')
-    fout.write('    - host: uniresolver.com\n')
+    fout.write('    - host: ' + DEFAULT_DOMAIN_NAME + '\n')
     fout.write('      http:\n')
     fout.write('        paths:\n')
     fout.write('          - path: /*\n')
     fout.write('            backend:\n')
     fout.write('              serviceName: "uni-resolver-web"\n')
-    fout.write('              servicePort: 80\n')
+    fout.write('              servicePort: 8080\n')
 
     for containterTag in containterTags.split(';'):
       if (containterTag == ''):
         return
       containerName, containerVersion = getContainerNameVersion(containterTag)
-      if (containerName == 'uni-resolver-web'): # this is the default-name, hosted at: uniresolver.com
+      if (containerName == 'uni-resolver-web'): # this is the default-name, hosted at: DEFAULT_DOMAIN_NAME
         continue
       subDomainName = containerName.replace('did', '').replace('driver', '').replace('uni-resolver', '').replace('-', '')
-      print('Adding domain: ' + subDomainName + '.uniresolver.com')
+      print('Adding domain: ' + subDomainName + '.' + DEFAULT_DOMAIN_NAME)
 
-      fout.write('    - host: ' + subDomainName + '.uniresolver.com\n')
+      fout.write('    - host: ' + subDomainName + '.' + DEFAULT_DOMAIN_NAME + '\n')
       fout.write('      http:\n')
       fout.write('        paths:\n')
       fout.write('          - path: /*\n')
