@@ -6,7 +6,7 @@ import getopt
 import yaml
 import subprocess
 
-DEFAULT_DOMAIN_NAME = 'uniresolver.com'
+DEFAULT_DOMAIN_NAME = 'dev.uniresolver.io'
 
 def initDeploymentDir(outputdir):
   if os.path.exists(outputdir + '/' + 'deploy.sh'):
@@ -32,7 +32,6 @@ def getContainerNameVersion(containterTag):
 
 def generateDeploymentSpecs(containterTags, outputdir):
     initDeploymentDir(outputdir)
-
     for containterTag in containterTags.split(';'):
         if (containterTag == ''):
           return
@@ -86,9 +85,16 @@ def generateIngress(containterTags, outputdir):
     fout.write('    - host: ' + DEFAULT_DOMAIN_NAME + '\n')
     fout.write('      http:\n')
     fout.write('        paths:\n')
-    fout.write('          - path: /*\n')
+    fout.write('          - path: /1.0/*\n')
     fout.write('            backend:\n')
     fout.write('              serviceName: "uni-resolver-web"\n')
+    fout.write('              servicePort: 8080\n')
+    fout.write('    - host: ' + DEFAULT_DOMAIN_NAME + '\n')
+    fout.write('      http:\n')
+    fout.write('        paths:\n')
+    fout.write('          - path: /*\n')
+    fout.write('            backend:\n')
+    fout.write('              serviceName: "uni-resolver-frontend"\n')
     fout.write('              servicePort: 8080\n')
 
     for containterTag in containterTags.split(';'):
@@ -133,8 +139,12 @@ def main(argv):
    containerTags = getContainerTags(compose)
    print("Container tags: " + containerTags)
 
-   generateDeploymentSpecs(containerTags, outputdir)
    generateIngress(containerTags, outputdir)
+
+   # we need also a spec for the frontend
+   containerTags += "phil21/uni-resolver-frontend:latest;"
+   generateDeploymentSpecs(containerTags, outputdir)
+
 
 if __name__ == "__main__":
    main(sys.argv[1:])
