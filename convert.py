@@ -6,7 +6,10 @@ import getopt
 import yaml
 import subprocess
 
+# CONSTANTS you may need to change:
 DEFAULT_DOMAIN_NAME = 'dev.uniresolver.io'
+UNIVERSAL_RESOLVER_FRONTEND_TAG = "universalresolver/uni-resolver-frontend:latest;"
+
 
 def initDeploymentDir(outputdir):
   if os.path.exists(outputdir + '/' + 'deploy.sh'):
@@ -14,8 +17,7 @@ def initDeploymentDir(outputdir):
   if not os.path.exists(outputdir):
     os.makedirs(outputdir)
   fout = open(outputdir + '/' + 'deploy.sh', "a+")
-  fout.write('kubectl delete --all deployments --namespace=uni-resolver\n')
-  fout.write('kubectl delete --all services --namespace=uni-resolver\n')
+  fout.write('kubectl delete all --all -n uni-resolver\n')
   fout.close()
   subprocess.call(['chmod', "a+x", outputdir + '/' + 'deploy.sh'])
 
@@ -31,7 +33,6 @@ def getContainerNameVersion(containterTag):
   return containerNameVersion.split(':')
 
 def generateDeploymentSpecs(containterTags, outputdir):
-    initDeploymentDir(outputdir)
     for containterTag in containterTags.split(';'):
         if (containterTag == ''):
           return
@@ -136,13 +137,15 @@ def main(argv):
    print ('Input file is:', compose)
    print ('Output dir is:', outputdir)
 
+   initDeploymentDir(outputdir)
+
    containerTags = getContainerTags(compose)
    print("Container tags: " + containerTags)
 
    generateIngress(containerTags, outputdir)
 
    # we need also a spec for the frontend
-   containerTags += "phil21/uni-resolver-frontend:latest;"
+   containerTags += UNIVERSAL_RESOLVER_FRONTEND_TAG
    generateDeploymentSpecs(containerTags, outputdir)
 
 
